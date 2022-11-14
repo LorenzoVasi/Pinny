@@ -1,15 +1,17 @@
-import os
+import interactions # For command on DS
+import os # Required for dotenv
+from dotenv import load_dotenv # Loading library dotenv
 
-import discord
-from dotenv import load_dotenv
+load_dotenv() # Load .env file
+TOKEN = os.getenv('DISCORD_TOKEN') # Take variable from it
 
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
+bot = interactions.Client(token=TOKEN) # Set TOKEN client
 
-client = discord.Client(intents=discord.Intents.default())
+@bot.command( # Command test
+    name="test",
+    description="Testing command",
+)
+async def my_first_command(ctx: interactions.CommandContext):
+    await ctx.send("Finalmente!")
 
-@client.event
-async def on_ready():
-    print(f'{client.user} has connected to Discord!')
-
-client.run(TOKEN)
+bot.start() # Start BOT

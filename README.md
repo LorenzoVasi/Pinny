@@ -2,6 +2,7 @@
 
 Pinny is a private Bot of Discord write with libraries Discord.py in Python
 
-## Requirements
+## Libraries
 
-For install Discord.py: `pip install -U discord.py`
+1. Interaction (old ): https://discord-interactions.readthedocs.io/en/latest/quickstart.html
+2. dotenv: https://github.com/motdotla/dotenv
