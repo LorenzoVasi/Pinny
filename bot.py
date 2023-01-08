@@ -12,6 +12,7 @@ load_dotenv() # Load .env file
 api_url = os.getenv('HOMEASSISTANT_URL')  # Take HA url from .env file, if the bot and HA has the same host url is something like localhost:8123
 tokenHA = os.getenv('HOMEASSISTANT_TOKEN') # Take HA Token from .env file
 TOKEN = os.getenv('DISCORD_TOKEN') # Take Discord TOKEN from /env file
+link_conn = os.getenv('LINK_CONNESSIONE') # URL Connection for players 
 
 headers = { # Headers for API Access 
     "Authorization": "Bearer " + tokenHA,
@@ -44,6 +45,15 @@ def getMCServerPlayerOnline():
     MinecraftServerPlayerOnline = MinecraftServerPlayerOnlineJson["state"] # Variable with data
     return MinecraftServerPlayerOnline
 
+def getMCServerWhoPlayerOnline():
+    MinecraftServerWhoPlayerOnline = None
+    if int(getMCServerPlayerOnline()) > 0:
+        MinecraftServerWhoPlayerOnlinePull = requests.get(api_url + "api/states/sensor.minecraft_server_players_online", headers=headers, ) # Curl Request for take json file
+        MinecraftServerWhoPlayerOnlineJson = json.loads(MinecraftServerWhoPlayerOnlinePull.text) # Json to object
+        MinecraftServerWhoPlayerOnline = MinecraftServerWhoPlayerOnlineJson["attributes"] # Variable with attributes
+        MinecraftServerWhoPlayerOnline = MinecraftServerWhoPlayerOnline["players_list"] # Variable with attributes
+    return MinecraftServerWhoPlayerOnline
+
 # MC server version
 def getMCServerVersion():
     MinecraftServerVersionPull = requests.get(api_url + "api/states/sensor.minecraft_server_version", headers=headers, ) # Curl Request for take json file
@@ -71,7 +81,17 @@ async def servermine_info(ctx: interactions.CommandContext):
         MinecraftServerVersion = getMCServerVersion()
         MinecraftServerPlayerMax = getMCServerPlayerMax()
         MinecraftServerPlayerOnline = getMCServerPlayerOnline()
-        message = "Server Minecraft v." + MinecraftServerVersion + ": stato " + MinecraftServerStatus + "\nNumero Giocatori: " + MinecraftServerPlayerOnline + "/" + MinecraftServerPlayerMax
+        MinecraftServerWhoPlayerOnline = getMCServerWhoPlayerOnline()
+
+        message = "Server Minecraft v." + MinecraftServerVersion + ": stato " + MinecraftServerStatus + "\nNumero Giocatori: " + MinecraftServerPlayerOnline + "/" + MinecraftServerPlayerMax 
+
+        if (MinecraftServerWhoPlayerOnline != None):
+            message += ". Giocatori online: "
+            for x in MinecraftServerWhoPlayerOnline:
+                message += x + ", "
+        
+        message += "\nLink: " + link_conn 
+
         await ctx.send(message)
     else:
         await ctx.send("Il server e' spento!")
@@ -89,7 +109,7 @@ async def servermine_start(ctx: interactions.CommandContext):
             if (status == "on"):
                 break
             time.sleep(1)
-        await ctx.send("Server minecraft avviato!")
+        await ctx.send("Server minecraft avviato! Link: " + link_conn)
     else:
         await ctx.send("Il server e' gia acceso!")
 
